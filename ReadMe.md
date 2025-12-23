@@ -71,7 +71,7 @@
     </li>
     <li><a href="#usage">Usage</a></li>
     <!-- <li><a href="#roadmap">Roadmap</a></li> -->
-    <li><a href="#contributing">Contributing</a></li>
+    <!-- <li><a href="#contributing">Contributing</a></li> -->
     <!-- <li><a href="#license">License</a></li> -->
     <li><a href="#contact">Contact</a></li>
     <li><a href="#acknowledgments">Acknowledgments</a></li>
@@ -83,18 +83,17 @@
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
-This is a simple mathematical expression parser written in c++. 
-eg. 
-3*4+5/2 ---->  
-[Literal, Numeric] : 3
-[Operator] : *
-[Literal, Numeric] : 4
-[Operator] : +
-[Literal, Numeric] : 5
+This is a simple mathematical expression parser written in c++. example; <br> 
+3*4+5/2 ---->  <br>
+[Literal, Numeric] : 3 <br>
+[Operator] : * <br>
+[Literal, Numeric] : 4 <br>
+[Operator] : + <br>
+[Literal, Numeric] : 5 <br>
 [Operator] : /
-[Literal, Numeric] : 2 
+[Literal, Numeric] : 2 <br>
 
-Uses a finite state machine method to parse expressions. Operators are also have precedence.
+Uses a finite state machine method to parse expressions. Operators are also have precedence.<br>
 
 <!-- [![Product Name Screen Shot][product-screenshot]](https://example.com) -->
 
@@ -132,7 +131,7 @@ This is an example of how to list things you need to use the software and how to
 
 ### Setup
 
-1. Download the header file [https://example.com](TinyMathParser.h)
+1. Download the header file [TinyMathParser.h](https://github.com/JustAnOrangeCat/TinyMathParser/releases/tag/v1.0)
 2. Include in your project
    ```cpp
    #include "TinyMathParser.h"
@@ -180,7 +179,7 @@ See the [open issues](https://github.com/github_username/repo_name/issues) for a
 
 
 <!-- CONTRIBUTING -->
-## Contributing
+<!-- ## Contributing
 
 Contributions are what make the open source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
 
@@ -193,7 +192,7 @@ Don't forget to give the project a star! Thanks again!
 4. Push to the Branch (`git push origin feature/AmazingFeature`)
 5. Open a Pull Request
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+<p align="right">(<a href="#readme-top">back to top</a>)</p> -->
 
 <!-- ### Top contributors:
 
@@ -214,7 +213,7 @@ Distributed under the project_license. See `LICENSE.txt` for more information.
 <!-- CONTACT -->
 ## Contact
 
-Navaneeth Krishnan S - [https://www.instagram.com/just_an_orangee_cat](@instagram) - navaneethkrishnantvm@gmail.com
+Navaneeth Krishnan S - [@instagram](https://www.instagram.com/just_an_orangee_cat) - navaneethkrishnantvm@gmail.com
 
 Project Link: [https://github.com/JustAnOrangeCat/TinyMathParser](https://github.com/JustAnOrangeCat/TinyMathParser)
 
