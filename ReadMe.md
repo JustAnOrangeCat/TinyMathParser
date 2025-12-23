@@ -18,21 +18,21 @@
 *** for contributors-url, forks-url, etc. This is an optional, concise syntax you may use.
 *** https://www.markdownguide.org/basic-syntax/#reference-style-links
 -->
-[![Contributors][contributors-shield]][contributors-url]
+<!-- [![Contributors][contributors-shield]][contributors-url]
 [![Forks][forks-shield]][forks-url]
 [![Stargazers][stars-shield]][stars-url]
 [![Issues][issues-shield]][issues-url]
 [![project_license][license-shield]][license-url]
-[![LinkedIn][linkedin-shield]][linkedin-url]
+[![LinkedIn][linkedin-shield]][linkedin-url] -->
 
 
 
 <!-- PROJECT LOGO -->
-<br />
+<!-- <br />
 <div align="center">
   <a href="https://github.com/github_username/repo_name">
     <img src="images/logo.png" alt="Logo" width="80" height="80">
-  </a>
+  </a> -->
 
 <h3 align="center">Tiny Math Parser</h3>
 
@@ -83,9 +83,9 @@
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
-[![Product Name Screen Shot][product-screenshot]](https://example.com)
+<!-- [![Product Name Screen Shot][product-screenshot]](https://example.com) -->
 
-Here's a blank template to get started. To avoid retyping too much info, do a search and replace with your text editor for the following: `github_username`, `repo_name`, `twitter_handle`, `linkedin_username`, `email_client`, `email`, `Tiny Math Parser`, `A simple mathematical expression parser`, `project_license`
+<!-- Here's a blank template to get started. To avoid retyping too much info, do a search and replace with your text editor for the following: `github_username`, `repo_name`, `twitter_handle`, `linkedin_username`, `email_client`, `email`, `Tiny Math Parser`, `A simple mathematical expression parser`, `project_license` -->
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -203,7 +203,7 @@ Distributed under the project_license. See `LICENSE.txt` for more information.
 
 Navaneeth Krishnan S - [https://www.instagram.com/just_an_orangee_cat](@instagram) - navaneethkrishnantvm@gmail.com
 
-Project Link: [https://github.com/JustAnOrangeCat/TinyMathParsere](https://github.com/JustAnOrangeCat/TinyMathParser)
+Project Link: [https://github.com/JustAnOrangeCat/TinyMathParser](https://github.com/JustAnOrangeCat/TinyMathParser)
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -211,7 +211,7 @@ Project Link: [https://github.com/JustAnOrangeCat/TinyMathParsere](https://githu
 <!-- ACKNOWLEDGMENTS -->
 ## Acknowledgments
 
-* [https://www.youtube.com/javidx9](One Lone Coder)
+* [https://www.youtube.com/javidx9] (One Lone Coder)
 <!-- * []()
 * []() -->
 
