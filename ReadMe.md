@@ -83,6 +83,19 @@
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
+This is a simple mathematical expression parser written in c++. 
+eg. 
+3*4+5/2 ---->  
+[Literal, Numeric] : 3
+[Operator] : *
+[Literal, Numeric] : 4
+[Operator] : +
+[Literal, Numeric] : 5
+[Operator] : /
+[Literal, Numeric] : 2 
+
+Uses a finite state machine method to parse expressions. Operators are also have precedence.
+
 <!-- [![Product Name Screen Shot][product-screenshot]](https://example.com) -->
 
 <!-- Here's a blank template to get started. To avoid retyping too much info, do a search and replace with your text editor for the following: `github_username`, `repo_name`, `twitter_handle`, `linkedin_username`, `email_client`, `email`, `Tiny Math Parser`, `A simple mathematical expression parser`, `project_license` -->

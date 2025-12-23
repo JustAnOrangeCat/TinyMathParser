@@ -4,11 +4,14 @@
 
 int main()
 {
-    std::string expression = "sin(x)";
+    std::string expression = "3*4+5/2";
     expression += ' '; // to add the last input.
 
     tmp::Compiler compiler;
     auto vecTokens = compiler.Parse(expression);
+
+    std::cout << expression << '\n';
+
     for (const auto &tokens : vecTokens)
         std::cout << tokens.str() << '\n';
 
