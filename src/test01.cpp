@@ -15,5 +15,7 @@ int main()
     for (const auto &tokens : vecTokens)
         std::cout << tokens.str() << '\n';
 
+    std::cout << '\n'
+              << compiler.Evaluate(vecTokens);
     return 0;
 }

@@ -28,6 +28,13 @@ namespace lut
 
 } // namespace lut
 
+// OPERATOR STRUCT
+struct Operator
+{
+    uint8_t precedence = 0;
+    uint8_t arguement = 0;
+};
+
 // TOKEN STRUCT
 struct Token
 {
@@ -43,6 +50,7 @@ struct Token
     } type = Type::Unknown;
 
     std::string text = "";
+    Operator op;
     double value = 0.0;
 
     std::string str() const
@@ -78,13 +86,6 @@ struct Token
     }
 };
 
-// OPERATOR STRUCT
-struct Operator
-{
-    uint8_t precedence = 0;
-    uint8_t atgurement = 0;
-};
-
 // ERROR CHECKER CLASS
 class CompileError : public std::exception
 {
@@ -110,6 +111,11 @@ namespace tmp
     {
     protected:
         std::unordered_map<std::string, Operator> mapOperators;
+
+        // HOLDERS
+        std::deque<Token> holding_stack;
+        std::deque<Token> output_stack;
+        std::deque<double> solving_stack;
 
     public:
         Compiler()
@@ -212,7 +218,6 @@ namespace tmp
                     {
                         stateNext = TokeniserState::CompleteToken;
                         tokCurrent = {Token::Type::Literal_Numeric, sCurrentToken};
-
                         tokCurrent.value = std::stod(sCurrentToken);
                     }
                     break;
@@ -232,6 +237,7 @@ namespace tmp
                             if (mapOperators.contains(sCurrentToken))
                             {
                                 tokCurrent = {Token::Type::Operator, sCurrentToken};
+                                tokCurrent.op = mapOperators[sCurrentToken];
                                 stateNext = TokeniserState::CompleteToken;
                             }
                             else
@@ -246,6 +252,7 @@ namespace tmp
                         if (mapOperators.contains(sCurrentToken))
                         {
                             tokCurrent = {Token::Type::Operator, sCurrentToken};
+                            tokCurrent.op = mapOperators[sCurrentToken];
                             stateNext = TokeniserState::CompleteToken;
                         }
                         else
@@ -310,6 +317,97 @@ namespace tmp
             }
 
             return vecOutputTokens;
+        }
+
+        std::string Evaluate(std::vector<Token> inputExpression)
+        {
+            for (auto tok : inputExpression)
+            {
+                if (tok.type == Token::Type::Literal_Numeric)
+                {
+                    output_stack.push_back(tok);
+                }
+                else if (tok.type == Token::Type::Operator)
+                {
+                    while (!holding_stack.empty())
+                    {
+                        if (holding_stack.front().type == Token::Type::Operator) // Checking if the first element is indeed an operator
+                        {
+                            const auto &holding_stack_op = holding_stack.front().op;
+
+                            // Precedence check
+                            if (holding_stack_op.precedence >= tok.op.precedence)
+                            {
+                                output_stack.push_back(holding_stack.front());
+                                holding_stack.pop_front();
+                            }
+                            else
+                                break;
+                        }
+                    }
+                    holding_stack.push_front(tok);
+                }
+                else
+                {
+                    throw CompileError("ERROR::BAD_SYMBOL");
+                }
+            }
+            // Draining the holding stack
+            while (!holding_stack.empty())
+            {
+                output_stack.push_back(holding_stack.front());
+                holding_stack.pop_front();
+            }
+
+            for (const auto &inst : output_stack)
+            {
+                switch (inst.type)
+                {
+                case Token::Type::Literal_Numeric:
+                    solving_stack.push_front(inst.value);
+                    break;
+                case Token::Type::Operator:
+                    std::vector<double> mem(inst.op.arguement);
+                    for (uint8_t a = 0; a < inst.op.arguement; a++)
+                    {
+                        if (solving_stack.empty())
+                            std::cout << "ERROR::BAD_EXPRESSION\n";
+                        else
+                        {
+                            mem[a] = solving_stack[0];
+                            solving_stack.pop_front();
+                        }
+                    }
+                    double result = 0.0;
+                    // Binary Operators
+                    if (inst.op.arguement == 2)
+                    {
+                        if (inst.text == "/")
+                            result = mem[1] / mem[0];
+
+                        if (inst.text == "*")
+                            result = mem[1] * mem[0];
+
+                        if (inst.text == "+")
+                            result = mem[1] + mem[0];
+
+                        if (inst.text == "-")
+                            result = mem[1] - mem[0];
+                    }
+                    // Unary Operators
+                    if (inst.op.arguement == 1)
+                    {
+                        if (inst.text == "+")
+                            result = +mem[0];
+                        if (inst.text == "-")
+                            result = -mem[0];
+                    }
+
+                    solving_stack.push_front(result);
+                    break;
+                }
+            }
+            return std::to_string(solving_stack[0]);
         }
     };
 } // namespace tmp

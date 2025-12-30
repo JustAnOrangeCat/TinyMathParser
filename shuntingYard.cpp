@@ -1,4 +1,9 @@
 #include <iostream>
+#include <vector>
+#include <string>
+#include <unordered_map>
+#include <deque>
+#include <stdint.h>
 
 int main(int argv, char **argc)
 {
@@ -10,6 +15,19 @@ int main(int argv, char **argc)
     }
 
     std::cout << "input: " << argc[1] << '\n';
+
+    struct Operator
+    {
+        uint8_t precedence = 0;
+        uint8_t arguements = 0;
+    };
+
+    std::unordered_map<char, Operator> mapOperators;
+    mapOperators['/'] = {4, 2};
+    mapOperators['*'] = {3, 2};
+    mapOperators['+'] = {2, 2};
+    mapOperators['-'] = {1, 2};
+
     std::string expression = argc[1]; // simple expression
 
     struct Symbol // THINGS TO HOLD
