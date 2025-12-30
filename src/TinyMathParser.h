@@ -323,18 +323,31 @@ namespace tmp
         {
             for (auto tok : inputExpression)
             {
+                // Literal_Numeric
                 if (tok.type == Token::Type::Literal_Numeric)
                 {
                     output_stack.push_back(tok);
                 }
+                // Operator
                 else if (tok.type == Token::Type::Operator)
                 {
-                    while (!holding_stack.empty())
+
+                    // Unary Operators // TODO
+                    // if (c == '-' | c == '+')
+                    // {
+                    //     if (previousSymbol.type != Symbol::Type::Literal_Numeric && previousSymbol.type != Symbol::Type::Parenthesis_Close)
+                    //     {
+                    //         new_op.arguements = 1;
+                    //         new_op.precedence = 100;
+                    //     }
+                    // }
+
+                    // Checking precedence of operator already there...
+                    while (!holding_stack.empty() && holding_stack.front().type != Token::Type::Paranthesis_Open)
                     {
                         if (holding_stack.front().type == Token::Type::Operator) // Checking if the first element is indeed an operator
                         {
                             const auto &holding_stack_op = holding_stack.front().op;
-
                             // Precedence check
                             if (holding_stack_op.precedence >= tok.op.precedence)
                             {
@@ -344,9 +357,38 @@ namespace tmp
                             else
                                 break;
                         }
+                        else
+                            throw CompileError("ERROR::UNKNOWN_OPERATOR_FOUND");
                     }
                     holding_stack.push_front(tok);
                 }
+                // Open_Para
+                else if (tok.type == Token::Type::Paranthesis_Open)
+                {
+                    holding_stack.push_front(tok);
+                }
+                // Close_Para
+                else if (tok.type == Token::Type::Paranthesis_Close)
+                {
+                    // flushing the holding stack until we reach openPara
+                    while (!holding_stack.empty() && holding_stack.front().type != Token::Type::Paranthesis_Open)
+                    {
+                        output_stack.push_back(holding_stack.front());
+                        holding_stack.pop_front();
+                    }
+                    // holding stack becomes empty :: error
+                    if (holding_stack.empty())
+                    {
+                        throw CompileError("ERROR::UNEXPECTED_PARANTHESIS");
+                    }
+                    // if holding stack has parenthesis
+                    // remove the corresponding openPara from holding stack
+                    if (!holding_stack.empty() && holding_stack.front().type == Token::Type::Paranthesis_Open)
+                    {
+                        holding_stack.pop_front();
+                    }
+                }
+                // Unknown
                 else
                 {
                     throw CompileError("ERROR::BAD_SYMBOL");

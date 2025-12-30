@@ -4,7 +4,7 @@
 
 int main()
 {
-    std::string expression = "3*4";
+    std::string expression = "3*4+3";
     expression += ' '; // to add the last input.
 
     tmp::Compiler compiler;
