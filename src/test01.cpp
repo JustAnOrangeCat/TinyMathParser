@@ -1,10 +1,9 @@
 #include <iostream>
-
 #include "TinyMathParser.h"
 
 int main()
 {
-    std::string expression = "3*4+3";
+    std::string expression = "";
     expression += ' '; // to add the last input.
 
     tmp::Compiler compiler;
@@ -15,7 +14,10 @@ int main()
     for (const auto &tokens : vecTokens)
         std::cout << tokens.str() << '\n';
 
-    std::cout << '\n'
-              << compiler.Evaluate(vecTokens);
+    /// compiler.setVariableValue(vecTokens[2], 60);
+
+    std::cout
+        << '\n'
+        << compiler.Evaluate(vecTokens);
     return 0;
 }

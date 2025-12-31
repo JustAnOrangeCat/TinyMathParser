@@ -9,6 +9,8 @@
 #include <variant>
 #include <deque>
 
+#include <cmath>
+
 // LOOK UP TABLE
 namespace lut
 {
@@ -25,7 +27,6 @@ namespace lut
     constexpr auto RealNumericDigits = MakeLUT(".0123456789");
     constexpr auto OperatorDigits = MakeLUT("!$%^&*+-=#@?|`/\\<>~");
     constexpr auto Alphabets = MakeLUT("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ");
-
 } // namespace lut
 
 // OPERATOR STRUCT
@@ -388,6 +389,15 @@ namespace tmp
                         holding_stack.pop_front();
                     }
                 }
+                // Variable
+                else if (tok.type == Token::Type::Variable)
+                {
+                }
+                // Function
+                else if (tok.type == Token::Type::Function)
+                {
+                    holding_stack.push_front(tok);
+                }
                 // Unknown
                 else
                 {
@@ -401,6 +411,14 @@ namespace tmp
                 holding_stack.pop_front();
             }
 
+            // quick TEST -- printing RPN
+            // std::cout << "\nRPN: ";
+            // for (const auto &s : output_stack)
+            // {
+            //     std::cout << s.text << " ";
+            // }
+            // std::cout << '\n';
+
             for (const auto &inst : output_stack)
             {
                 switch (inst.type)
@@ -408,6 +426,18 @@ namespace tmp
                 case Token::Type::Literal_Numeric:
                     solving_stack.push_front(inst.value);
                     break;
+
+                case Token::Type::Function:
+                {
+                    double result = 0.0;
+                    if (inst.text == "sin")
+                    {
+                        result += std::sin(solving_stack[0]);
+                        solving_stack.pop_front();
+                    }
+                    solving_stack.push_front(result);
+                    break;
+                }
                 case Token::Type::Operator:
                     std::vector<double> mem(inst.op.arguement);
                     for (uint8_t a = 0; a < inst.op.arguement; a++)
@@ -450,6 +480,17 @@ namespace tmp
                 }
             }
             return std::to_string(solving_stack[0]);
+        }
+
+        void setVariableValue(Token &variable, double value)
+        {
+            if (variable.type == Token::Type::Variable)
+            {
+                variable.value = value;
+                variable.type = Token::Type::Literal_Numeric;
+            }
+            else
+                throw CompileError("ERROR::UNRECOGNIZED_TOKEN::NOT_VARIABLE");
         }
     };
 } // namespace tmp
