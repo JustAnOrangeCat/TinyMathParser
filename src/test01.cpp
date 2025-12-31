@@ -3,7 +3,7 @@
 
 int main()
 {
-    std::string expression = "";
+    std::string expression = "x*x";
     expression += ' '; // to add the last input.
 
     tmp::Compiler compiler;
@@ -14,7 +14,7 @@ int main()
     for (const auto &tokens : vecTokens)
         std::cout << tokens.str() << '\n';
 
-    /// compiler.setVariableValue(vecTokens[2], 60);
+    compiler.setVariableValue(vecTokens, "x", 10);
 
     std::cout
         << '\n'

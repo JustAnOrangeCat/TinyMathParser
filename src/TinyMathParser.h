@@ -27,6 +27,7 @@ namespace lut
     constexpr auto RealNumericDigits = MakeLUT(".0123456789");
     constexpr auto OperatorDigits = MakeLUT("!$%^&*+-=#@?|`/\\<>~");
     constexpr auto Alphabets = MakeLUT("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ");
+
 } // namespace lut
 
 // OPERATOR STRUCT
@@ -108,6 +109,17 @@ private:
 // COMPILER
 namespace tmp
 {
+    // rasied to function
+    inline double raisedTo(double num1, double num2)
+    {
+        double sum = num1;
+        for (int i = 1; i <= num2; i++)
+        {
+            sum *= num1;
+        }
+        return sum;
+    }
+
     class Compiler
     {
     protected:
@@ -118,6 +130,8 @@ namespace tmp
         std::deque<Token> output_stack;
         std::deque<double> solving_stack;
 
+        std::unordered_map<std::string, bool> FunctionName;
+
     public:
         Compiler()
         {
@@ -125,6 +139,7 @@ namespace tmp
             mapOperators["/"] = {3, 2};
             mapOperators["+"] = {1, 2};
             mapOperators["-"] = {1, 2};
+            mapOperators["^"] = {4, 2};
         }
 
         std::vector<Token> Parse(const std::string &input)
@@ -166,7 +181,6 @@ namespace tmp
                     tokCurrent = {Token::Type::Unknown, ""};
 
                     // First character Analysis
-
                     // checking white space
                     if (lut::WhiteSpaceDigits.at(charNow[0]))
                     {
@@ -392,6 +406,7 @@ namespace tmp
                 // Variable
                 else if (tok.type == Token::Type::Variable)
                 {
+                    output_stack.push_back(tok);
                 }
                 // Function
                 else if (tok.type == Token::Type::Function)
@@ -412,6 +427,7 @@ namespace tmp
             }
 
             // quick TEST -- printing RPN
+
             // std::cout << "\nRPN: ";
             // for (const auto &s : output_stack)
             // {
@@ -423,10 +439,17 @@ namespace tmp
             {
                 switch (inst.type)
                 {
+                // Numeric
                 case Token::Type::Literal_Numeric:
                     solving_stack.push_front(inst.value);
                     break;
 
+                // Variable
+                case Token::Type::Variable:
+                    solving_stack.push_front(inst.value);
+                    break;
+
+                // Function
                 case Token::Type::Function:
                 {
                     double result = 0.0;
@@ -435,15 +458,32 @@ namespace tmp
                         result += std::sin(solving_stack[0]);
                         solving_stack.pop_front();
                     }
+                    else if (inst.text == "cos")
+                    {
+                        result += std::cos(solving_stack[0]);
+                        solving_stack.pop_front();
+                    }
+                    else if (inst.text == "tan")
+                    {
+                        result += std::tan(solving_stack[0]);
+                        solving_stack.pop_front();
+                    }
+                    else if (inst.text == "sqrt")
+                    {
+                        result += std::sqrt(solving_stack[0]);
+                        solving_stack.pop_front();
+                    }
                     solving_stack.push_front(result);
                     break;
                 }
+
+                // Operator
                 case Token::Type::Operator:
                     std::vector<double> mem(inst.op.arguement);
                     for (uint8_t a = 0; a < inst.op.arguement; a++)
                     {
                         if (solving_stack.empty())
-                            std::cout << "ERROR::BAD_EXPRESSION\n";
+                            throw CompileError("ERROR::BAD_EXPRESSION\n");
                         else
                         {
                             mem[a] = solving_stack[0];
@@ -465,6 +505,8 @@ namespace tmp
 
                         if (inst.text == "-")
                             result = mem[1] - mem[0];
+                        if (inst.text == "^")
+                            result = raisedTo(mem[1], mem[0]);
                     }
                     // Unary Operators
                     if (inst.op.arguement == 1)
@@ -482,15 +524,15 @@ namespace tmp
             return std::to_string(solving_stack[0]);
         }
 
-        void setVariableValue(Token &variable, double value)
+        void setVariableValue(std::vector<Token> &tokVec, std::string variableName, double value)
         {
-            if (variable.type == Token::Type::Variable)
+            for (auto &token : tokVec)
             {
-                variable.value = value;
-                variable.type = Token::Type::Literal_Numeric;
+                if (token.text == variableName)
+                {
+                    token.value = value;
+                }
             }
-            else
-                throw CompileError("ERROR::UNRECOGNIZED_TOKEN::NOT_VARIABLE");
         }
     };
 } // namespace tmp
