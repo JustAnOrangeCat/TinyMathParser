@@ -30,95 +30,87 @@ namespace lut
 
 } // namespace lut
 
-// OPERATOR STRUCT
-struct Operator
-{
-    uint8_t precedence = 0;
-    uint8_t arguement = 0;
-};
-
-// TOKEN STRUCT
-struct Token
-{
-    enum class Type : uint8_t
-    {
-        Unknown,
-        Literal_Numeric,
-        Operator,
-        Paranthesis_Open,
-        Paranthesis_Close,
-        Variable,
-        Function,
-    } type = Type::Unknown;
-
-    std::string text = "";
-    Operator op;
-    double value = 0.0;
-
-    std::string str() const
-    {
-        std::string o;
-        switch (type)
-        {
-        case Token::Type::Unknown:
-            o += "[UNKNOWN]";
-            break;
-        case Token::Type::Literal_Numeric:
-            o += "[Literal, Numeric]";
-            break;
-        case Token::Type::Paranthesis_Open:
-            o += "[Paranthesis, Open]";
-            break;
-        case Token::Type::Paranthesis_Close:
-            o += "[Paranthesis, Close]";
-            break;
-        case Token::Type::Operator:
-            o += "[Operator]";
-            break;
-        case Token::Type::Variable:
-            o += "[Variable]";
-            break;
-        case Token::Type::Function:
-            o += "[Function]";
-            break;
-        }
-
-        o += " : " + text;
-        return o;
-    }
-};
-
-// ERROR CHECKER CLASS
-class CompileError : public std::exception
-{
-public:
-    CompileError(const std::string &msg)
-    {
-        p_message = msg;
-    }
-
-    const char *what()
-    {
-        return p_message.c_str();
-    }
-
-private:
-    std::string p_message;
-};
-
 // COMPILER
 namespace tmp
 {
     // rasied to function
-    inline double raisedTo(double num1, double num2)
+    static inline double raisedTo(double num1, double num2);
+
+    // OPERATOR STRUCT
+    struct Operator
     {
-        double sum = num1;
-        for (int i = 1; i <= num2; i++)
+        uint8_t precedence = 0;
+        uint8_t arguement = 0;
+    };
+
+    // TOKEN STRUCT
+    struct Token
+    {
+        enum class Type : uint8_t
         {
-            sum *= num1;
+            Unknown,
+            Literal_Numeric,
+            Operator,
+            Paranthesis_Open,
+            Paranthesis_Close,
+            Variable,
+            Function,
+        } type = Type::Unknown;
+
+        std::string text = "";
+        Operator op;
+        double value = 0.0;
+
+        std::string str() const
+        {
+            std::string o;
+            switch (type)
+            {
+            case Token::Type::Unknown:
+                o += "[UNKNOWN]";
+                break;
+            case Token::Type::Literal_Numeric:
+                o += "[Literal, Numeric]";
+                break;
+            case Token::Type::Paranthesis_Open:
+                o += "[Paranthesis, Open]";
+                break;
+            case Token::Type::Paranthesis_Close:
+                o += "[Paranthesis, Close]";
+                break;
+            case Token::Type::Operator:
+                o += "[Operator]";
+                break;
+            case Token::Type::Variable:
+                o += "[Variable]";
+                break;
+            case Token::Type::Function:
+                o += "[Function]";
+                break;
+            }
+
+            o += " : " + text;
+            return o;
         }
-        return sum;
-    }
+    };
+
+    // ERROR CHECKER CLASS
+    class CompileError : public std::exception
+    {
+    public:
+        CompileError(const std::string &msg)
+        {
+            p_message = msg;
+        }
+
+        const char *what()
+        {
+            return p_message.c_str();
+        }
+
+    private:
+        std::string p_message;
+    };
 
     class Compiler
     {
@@ -334,7 +326,7 @@ namespace tmp
             return vecOutputTokens;
         }
 
-        std::string Evaluate(std::vector<Token> inputExpression)
+        double Evaluate(std::vector<Token> inputExpression)
         {
             for (auto tok : inputExpression)
             {
@@ -347,15 +339,7 @@ namespace tmp
                 else if (tok.type == Token::Type::Operator)
                 {
 
-                    // Unary Operators // TODO
-                    // if (c == '-' | c == '+')
-                    // {
-                    //     if (previousSymbol.type != Symbol::Type::Literal_Numeric && previousSymbol.type != Symbol::Type::Parenthesis_Close)
-                    //     {
-                    //         new_op.arguements = 1;
-                    //         new_op.precedence = 100;
-                    //     }
-                    // }
+                    // Unary Operators // TODO//
 
                     // Checking precedence of operator already there...
                     while (!holding_stack.empty() && holding_stack.front().type != Token::Type::Paranthesis_Open)
@@ -427,7 +411,6 @@ namespace tmp
             }
 
             // quick TEST -- printing RPN
-
             // std::cout << "\nRPN: ";
             // for (const auto &s : output_stack)
             // {
@@ -521,7 +504,7 @@ namespace tmp
                     break;
                 }
             }
-            return std::to_string(solving_stack[0]);
+            return solving_stack[0];
         }
 
         void setVariableValue(std::vector<Token> &tokVec, std::string variableName, double value)
@@ -535,6 +518,17 @@ namespace tmp
             }
         }
     };
+
+    static inline double raisedTo(double num1, double num2)
+    {
+        double sum = num1;
+        for (int i = 1; i <= num2; i++)
+        {
+            sum *= num1;
+        }
+        return sum;
+    }
+
 } // namespace tmp
 
 #endif

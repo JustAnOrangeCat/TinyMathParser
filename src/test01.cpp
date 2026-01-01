@@ -3,21 +3,24 @@
 
 int main()
 {
-    std::string expression = "x*x";
+    std::string expression = "x^2";
     expression += ' '; // to add the last input.
 
-    tmp::Compiler compiler;
-    auto vecTokens = compiler.Parse(expression);
+    try
+    {
+        tmp::Compiler compiler;
+        auto vecTokens = compiler.Parse(expression);
 
-    std::cout << expression << '\n';
+        compiler.setVariableValue(vecTokens, "x", 10);
 
-    for (const auto &tokens : vecTokens)
-        std::cout << tokens.str() << '\n';
+        std::cout
+            << '\n'
+            << compiler.Evaluate(vecTokens) << '\n';
+    }
+    catch (tmp::CompileError &e)
+    {
+        std::cout << e.what() << '\n';
+    }
 
-    compiler.setVariableValue(vecTokens, "x", 10);
-
-    std::cout
-        << '\n'
-        << compiler.Evaluate(vecTokens);
     return 0;
 }
