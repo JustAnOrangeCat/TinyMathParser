@@ -9,6 +9,8 @@
 #include <variant>
 #include <deque>
 
+#include <cmath>
+
 // LOOK UP TABLE
 namespace lut
 {
@@ -28,88 +30,99 @@ namespace lut
 
 } // namespace lut
 
-// TOKEN STRUCT
-struct Token
-{
-    enum class Type : uint8_t
-    {
-        Unknown,
-        Literal_Numeric,
-        Operator,
-        Paranthesis_Open,
-        Paranthesis_Close,
-        Variable,
-        Function,
-    } type = Type::Unknown;
-
-    std::string text = "";
-    double value = 0.0;
-
-    std::string str() const
-    {
-        std::string o;
-        switch (type)
-        {
-        case Token::Type::Unknown:
-            o += "[UNKNOWN]";
-            break;
-        case Token::Type::Literal_Numeric:
-            o += "[Literal, Numeric]";
-            break;
-        case Token::Type::Paranthesis_Open:
-            o += "[Paranthesis, Open]";
-            break;
-        case Token::Type::Paranthesis_Close:
-            o += "[Paranthesis, Close]";
-            break;
-        case Token::Type::Operator:
-            o += "[Operator]";
-            break;
-        case Token::Type::Variable:
-            o += "[Variable]";
-            break;
-        case Token::Type::Function:
-            o += "[Function]";
-            break;
-        }
-
-        o += " : " + text;
-        return o;
-    }
-};
-
-// OPERATOR STRUCT
-struct Operator
-{
-    uint8_t precedence = 0;
-    uint8_t atgurement = 0;
-};
-
-// ERROR CHECKER CLASS
-class CompileError : public std::exception
-{
-public:
-    CompileError(const std::string &msg)
-    {
-        p_message = msg;
-    }
-
-    const char *what()
-    {
-        return p_message.c_str();
-    }
-
-private:
-    std::string p_message;
-};
-
 // COMPILER
 namespace tmp
 {
+    // rasied to function
+    static inline double raisedTo(double num1, double num2);
+
+    // OPERATOR STRUCT
+    struct Operator
+    {
+        uint8_t precedence = 0;
+        uint8_t arguement = 0;
+    };
+
+    // TOKEN STRUCT
+    struct Token
+    {
+        enum class Type : uint8_t
+        {
+            Unknown,
+            Literal_Numeric,
+            Operator,
+            Paranthesis_Open,
+            Paranthesis_Close,
+            Variable,
+            Function,
+        } type = Type::Unknown;
+
+        std::string text = "";
+        Operator op;
+        double value = 0.0;
+
+        std::string str() const
+        {
+            std::string o;
+            switch (type)
+            {
+            case Token::Type::Unknown:
+                o += "[UNKNOWN]";
+                break;
+            case Token::Type::Literal_Numeric:
+                o += "[Literal, Numeric]";
+                break;
+            case Token::Type::Paranthesis_Open:
+                o += "[Paranthesis, Open]";
+                break;
+            case Token::Type::Paranthesis_Close:
+                o += "[Paranthesis, Close]";
+                break;
+            case Token::Type::Operator:
+                o += "[Operator]";
+                break;
+            case Token::Type::Variable:
+                o += "[Variable]";
+                break;
+            case Token::Type::Function:
+                o += "[Function]";
+                break;
+            }
+
+            o += " : " + text;
+            return o;
+        }
+    };
+
+    // ERROR CHECKER CLASS
+    class CompileError : public std::exception
+    {
+    public:
+        CompileError(const std::string &msg)
+        {
+            p_message = msg;
+        }
+
+        const char *what()
+        {
+            return p_message.c_str();
+        }
+
+    private:
+        std::string p_message;
+    };
+
     class Compiler
     {
     protected:
         std::unordered_map<std::string, Operator> mapOperators;
+
+        // HOLDERS
+        std::deque<Token> holding_stack;
+        std::deque<Token> output_stack;
+        std::deque<double> solving_stack;
+
+        std::unordered_map<std::string, bool> FunctionName;
 
     public:
         Compiler()
@@ -118,6 +131,7 @@ namespace tmp
             mapOperators["/"] = {3, 2};
             mapOperators["+"] = {1, 2};
             mapOperators["-"] = {1, 2};
+            mapOperators["^"] = {4, 2};
         }
 
         std::vector<Token> Parse(const std::string &input)
@@ -159,7 +173,6 @@ namespace tmp
                     tokCurrent = {Token::Type::Unknown, ""};
 
                     // First character Analysis
-
                     // checking white space
                     if (lut::WhiteSpaceDigits.at(charNow[0]))
                     {
@@ -212,7 +225,6 @@ namespace tmp
                     {
                         stateNext = TokeniserState::CompleteToken;
                         tokCurrent = {Token::Type::Literal_Numeric, sCurrentToken};
-
                         tokCurrent.value = std::stod(sCurrentToken);
                     }
                     break;
@@ -232,6 +244,7 @@ namespace tmp
                             if (mapOperators.contains(sCurrentToken))
                             {
                                 tokCurrent = {Token::Type::Operator, sCurrentToken};
+                                tokCurrent.op = mapOperators[sCurrentToken];
                                 stateNext = TokeniserState::CompleteToken;
                             }
                             else
@@ -246,6 +259,7 @@ namespace tmp
                         if (mapOperators.contains(sCurrentToken))
                         {
                             tokCurrent = {Token::Type::Operator, sCurrentToken};
+                            tokCurrent.op = mapOperators[sCurrentToken];
                             stateNext = TokeniserState::CompleteToken;
                         }
                         else
@@ -311,7 +325,210 @@ namespace tmp
 
             return vecOutputTokens;
         }
+
+        double Evaluate(std::vector<Token> inputExpression)
+        {
+            for (auto tok : inputExpression)
+            {
+                // Literal_Numeric
+                if (tok.type == Token::Type::Literal_Numeric)
+                {
+                    output_stack.push_back(tok);
+                }
+                // Operator
+                else if (tok.type == Token::Type::Operator)
+                {
+
+                    // Unary Operators // TODO//
+
+                    // Checking precedence of operator already there...
+                    while (!holding_stack.empty() && holding_stack.front().type != Token::Type::Paranthesis_Open)
+                    {
+                        if (holding_stack.front().type == Token::Type::Operator) // Checking if the first element is indeed an operator
+                        {
+                            const auto &holding_stack_op = holding_stack.front().op;
+                            // Precedence check
+                            if (holding_stack_op.precedence >= tok.op.precedence)
+                            {
+                                output_stack.push_back(holding_stack.front());
+                                holding_stack.pop_front();
+                            }
+                            else
+                                break;
+                        }
+                        else
+                            throw CompileError("ERROR::UNKNOWN_OPERATOR_FOUND");
+                    }
+                    holding_stack.push_front(tok);
+                }
+                // Open_Para
+                else if (tok.type == Token::Type::Paranthesis_Open)
+                {
+                    holding_stack.push_front(tok);
+                }
+                // Close_Para
+                else if (tok.type == Token::Type::Paranthesis_Close)
+                {
+                    // flushing the holding stack until we reach openPara
+                    while (!holding_stack.empty() && holding_stack.front().type != Token::Type::Paranthesis_Open)
+                    {
+                        output_stack.push_back(holding_stack.front());
+                        holding_stack.pop_front();
+                    }
+                    // holding stack becomes empty :: error
+                    if (holding_stack.empty())
+                    {
+                        throw CompileError("ERROR::UNEXPECTED_PARANTHESIS");
+                    }
+                    // if holding stack has parenthesis
+                    // remove the corresponding openPara from holding stack
+                    if (!holding_stack.empty() && holding_stack.front().type == Token::Type::Paranthesis_Open)
+                    {
+                        holding_stack.pop_front();
+                    }
+                }
+                // Variable
+                else if (tok.type == Token::Type::Variable)
+                {
+                    output_stack.push_back(tok);
+                }
+                // Function
+                else if (tok.type == Token::Type::Function)
+                {
+                    holding_stack.push_front(tok);
+                }
+                // Unknown
+                else
+                {
+                    throw CompileError("ERROR::BAD_SYMBOL");
+                }
+            }
+            // Draining the holding stack
+            while (!holding_stack.empty())
+            {
+                output_stack.push_back(holding_stack.front());
+                holding_stack.pop_front();
+            }
+
+            // quick TEST -- printing RPN
+            // std::cout << "\nRPN: ";
+            // for (const auto &s : output_stack)
+            // {
+            //     std::cout << s.text << " ";
+            // }
+            // std::cout << '\n';
+
+            for (const auto &inst : output_stack)
+            {
+                switch (inst.type)
+                {
+                // Numeric
+                case Token::Type::Literal_Numeric:
+                    solving_stack.push_front(inst.value);
+                    break;
+
+                // Variable
+                case Token::Type::Variable:
+                    solving_stack.push_front(inst.value);
+                    break;
+
+                // Function
+                case Token::Type::Function:
+                {
+                    double result = 0.0;
+                    if (inst.text == "sin")
+                    {
+                        result += std::sin(solving_stack[0]);
+                        solving_stack.pop_front();
+                    }
+                    else if (inst.text == "cos")
+                    {
+                        result += std::cos(solving_stack[0]);
+                        solving_stack.pop_front();
+                    }
+                    else if (inst.text == "tan")
+                    {
+                        result += std::tan(solving_stack[0]);
+                        solving_stack.pop_front();
+                    }
+                    else if (inst.text == "sqrt")
+                    {
+                        result += std::sqrt(solving_stack[0]);
+                        solving_stack.pop_front();
+                    }
+                    solving_stack.push_front(result);
+                    break;
+                }
+
+                // Operator
+                case Token::Type::Operator:
+                    std::vector<double> mem(inst.op.arguement);
+                    for (uint8_t a = 0; a < inst.op.arguement; a++)
+                    {
+                        if (solving_stack.empty())
+                            throw CompileError("ERROR::BAD_EXPRESSION\n");
+                        else
+                        {
+                            mem[a] = solving_stack[0];
+                            solving_stack.pop_front();
+                        }
+                    }
+                    double result = 0.0;
+                    // Binary Operators
+                    if (inst.op.arguement == 2)
+                    {
+                        if (inst.text == "/")
+                            result = mem[1] / mem[0];
+
+                        if (inst.text == "*")
+                            result = mem[1] * mem[0];
+
+                        if (inst.text == "+")
+                            result = mem[1] + mem[0];
+
+                        if (inst.text == "-")
+                            result = mem[1] - mem[0];
+                        if (inst.text == "^")
+                            result = raisedTo(mem[1], mem[0]);
+                    }
+                    // Unary Operators
+                    if (inst.op.arguement == 1)
+                    {
+                        if (inst.text == "+")
+                            result = +mem[0];
+                        if (inst.text == "-")
+                            result = -mem[0];
+                    }
+
+                    solving_stack.push_front(result);
+                    break;
+                }
+            }
+            return solving_stack[0];
+        }
+
+        void setVariableValue(std::vector<Token> &tokVec, std::string variableName, double value)
+        {
+            for (auto &token : tokVec)
+            {
+                if (token.text == variableName)
+                {
+                    token.value = value;
+                }
+            }
+        }
     };
+
+    static inline double raisedTo(double num1, double num2)
+    {
+        double sum = num1;
+        for (int i = 1; i <= num2; i++)
+        {
+            sum *= num1;
+        }
+        return sum;
+    }
+
 } // namespace tmp
 
 #endif
